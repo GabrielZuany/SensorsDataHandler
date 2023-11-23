@@ -13,3 +13,4 @@ tzdata==2023.3
 plotly==5.18.0
 matplotlib==3.8.2
 seaborn==0.13.0
+plotly_express==0.4.1
