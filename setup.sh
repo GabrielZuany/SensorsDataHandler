@@ -12,4 +12,4 @@ dos2unix kafka/setup.sh
 ./kafka/setup.sh
 
 echo -e "${GREEN}|=======================|Running Machine Learning Model|=======================|${NC}"
-python3 src/model.py
+python3 -W ignore src/model.py
