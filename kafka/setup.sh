@@ -24,8 +24,8 @@ python3 kafka/create_topic.py
 echo -e "${GREEN}|=======================|Starting Producer|=======================|${NC}"
 gnome-terminal -- python3 kafka/write_in_queue.py
 
-# echo -e "${GREEN}|=======================|Starting Consumer|=======================|${NC}"
-# ./kafka_2.12-2.8.0/bin/kafka-console-consumer.sh --topic test --from-beginning --bootstrap-server localhost:9092
+echo -e "${GREEN}|=======================|Starting Consumer|=======================|${NC}"
+gnome-terminal -- python3 kafka/read_from_queue.py
 
 # echo -e "${GREEN}|=======================|Starting Consumer|=======================|${NC}"
 # ./kafka_2.12-2.8.0/bin/kafka-console-consumer.sh --topic test --from-beginning --bootstrap-server localhost:9092
