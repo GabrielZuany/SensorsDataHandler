@@ -1,3 +1,5 @@
+# Used to create a topic in Kafka to be used by the producer and consumer
+
 from kafka.admin import KafkaAdminClient,NewTopic
 
 TOPIC="SensorsDataStream"

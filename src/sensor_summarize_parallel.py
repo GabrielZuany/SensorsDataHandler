@@ -1,3 +1,5 @@
+# Was used to summarize the data from the sensors in parallel and save it to a CSV file
+
 from multiprocessing import cpu_count
 import os
 import time

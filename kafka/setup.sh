@@ -1,3 +1,7 @@
+# Used to setup kafka and start the server, zookeeper, producer and consumer
+# Uses gnome-terminal to open multiple terminals and run the commands in parallel
+# Check if gnome-terminal is installed and supported by your OS
+
 ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
 

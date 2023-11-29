@@ -1,3 +1,7 @@
+# Used to write data to the queue in real time from a CSV file 
+# In real scenario, this data would come from sensors and would be appended to the CSV file in real time 
+# (the logic is the same, but the data source is different and i would read dinamically from the CSV file)
+
 from time import sleep
 from kafka import KafkaProducer
 import json

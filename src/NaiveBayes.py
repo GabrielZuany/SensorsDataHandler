@@ -1,3 +1,5 @@
+# Naive Bayes Classifier from scratch
+
 import numpy as np
 
 class NaiveBayes:

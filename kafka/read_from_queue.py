@@ -1,3 +1,6 @@
+# Used to read data from Kafka queue and insert into Postgres database
+# The data is read from the queue and inserted into the database in real time (1 second interval)
+
 from time import sleep
 from kafka import KafkaConsumer
 import json

@@ -1,3 +1,5 @@
+# Was used to summarize the data from the sensors and save it to a CSV file
+
 import os
 import time
 import pandas as pd
@@ -23,7 +25,6 @@ for file in os.listdir(DATAFOLDER):
         full_df = full_df.rename(columns={'target_iALL_PS': 'status'})
     
 full_df.to_csv(DATAFOLDER + 'full.csv')
-# print(full_df.head())
 
 end_time = time.time()
 print('Elapsed time: ' + str(end_time - start_time) + ' seconds')
