@@ -13,33 +13,11 @@ Your objective is to explore, analyze, and model sensor data to predict possible
 - The code of the developed model, preferably in Python or the language of your choice, documented and organized.
 - A concise presentation of the results obtained, highlighting the chosen metrics for model evaluation and key insights derived from the analysis.
 
-## Key Evaluation Points:
-
-- Code organization
-- Choice and implementation of the ML model
-- Detailing of exploratory analysis
-- Presentation of the challenge
 
 ---
+---
 
-# Desafio de Previsão de Falha de Equipamentos Industriais
+## Getting Started
 
-Você foi contratado por uma startup especializada no desenvolvimento de soluções de Inteligência Artificial para os mais diversos setores industriais. Seu papel é criar um modelo preditivo utilizando dados dos sensores da planta para identificar padrões que precedem falhas no equipamento. Essas falhas podem resultar em interrupções na produção, custos adicionais de manutenção e perda de eficiência operacional. O objetivo é criar um modelo preditivo que possa identificar antecipadamente as possíveis falhas de um equipamento em específico a partir dos valores dos demais sensores da planta, permitindo que a empresa intervenha proativamente antes que ocorram problemas.
 
-Os dados disponíveis consistem em leituras de sensores instalados no equipamento industrial ao longo do tempo. Esses dados podem incluir variáveis como temperatura, pressão, vibração, corrente elétrica, entre outros parâmetros relevantes para o funcionamento do equipamento.
 
-## Objetivo:
-
-Seu objetivo será explorar, analisar e modelar os dados dos sensores para prever possíveis falhas no equipamento industrial. Isso envolve a preparação dos dados, identificação de padrões ou comportamentos anômalos que possam indicar falhas iminentes e a criação de um modelo preditivo capaz de prever essas falhas com uma boa precisão.
-
-## Entregáveis:
-
-- O código do modelo desenvolvido, preferencialmente em Python ou na linguagem de sua escolha, documentado e organizado.
-- Uma apresentação resumida dos resultados obtidos, destacando as métricas escolhidas para avaliação do modelo e os principais insights derivados da análise.
-
-## Principais pontos de avaliação:
-
-- Organização do código
-- Escolha e implementação do modelo de ML
-- Detalhamento da análise exploratória
-- Apresentação do desafio
