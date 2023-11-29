@@ -1,122 +1,102 @@
-from multiprocessing import cpu_count
-import os
+# Used to simulate the prediction of a Machine Learning model in real time
+# Every second, the script makes a query in the database and checks if there is new data
+# If so, it concatenates with the previous data and makes the prediction based on the new data set
+# The model used is Naive Bayes, which is a simple and fast classification model
+
 import time
 import pandas as pd
-from concurrent.futures import ProcessPoolExecutor
 import numpy as np
-
-DATAFOLDER = '../data/'
-BASE_NAME = 'TAG_iALL_PS_'
-full_csv_exists = 'full.csv' in os.listdir(DATAFOLDER)
-
-if full_csv_exists:
-    start_time = time.time()
-    full_df = pd.read_csv('../data/full.csv')
-    end_time = time.time()
-    print('Elapsed time: ' + str(end_time - start_time) + ' seconds')
-
-else:
-    start_time = time.time()
-    def read(file):
-        if file.endswith('00.csv'):
-            return None
-
-        print('Reading file: ' + file)
-        df = pd.read_csv(DATAFOLDER + file)
-        df = df.set_index('timestamp')
-
-        return df[file.split('.')[0]]
-
-    files_to_process = [file for file in os.listdir(DATAFOLDER) if not file.endswith('00.csv')]
-
-    # Use ProcessPoolExecutor for parallel processing
-    with ProcessPoolExecutor(cpu_count()) as executor:
-        # Map the function to process each file in parallel
-        dfs = list(executor.map(read, files_to_process))
-
-    # Create the full_df by concatenating the DataFrames
-    full_df = pd.concat([pd.read_csv(DATAFOLDER + 'TAG_iALL_PS_00.csv').set_index('timestamp')] + dfs, ignore_index=False, axis=1)
-
-    # Rename the 'target_iALL_PS' column to 'status' 
-    if 'target_iALL_PS.csv' in files_to_process:
-        full_df = full_df.rename(columns={'target_iALL_PS': 'status'})
-
-    # Save the result to a CSV file
-    full_df.to_csv(DATAFOLDER + 'full.csv')
-    end_time = time.time()
-    print('Elapsed time: ' + str(end_time - start_time) + ' seconds')
-    
-
-
-# Data cleaning
-# Drop duplicates and NaNs (when all rows/columns are NaN)
-full_df = full_df.drop_duplicates()
-full_df = full_df.dropna(axis=1, how='all')
-full_df = full_df.dropna(axis=0, how='all')
-full_df = full_df.reset_index()
-
-# Convert the timestamp column to datetime and set it as the index
-full_df['timestamp'] = pd.to_datetime(full_df['timestamp'])
-full_df = full_df.sort_values(by='timestamp')
-full_df = full_df.reset_index()
-full_df = full_df.set_index('timestamp') if 'timestamp' in full_df.columns else full_df
-
-# Create a column with the status as a boolean (might be useful for plotting later)
-full_df['status_bool'] = np.where(full_df['status'] == 'NORMAL', 0, 1)
-
-# drop the columns that are not useful
-full_df = full_df.drop(columns=['index'])
-full_df = full_df.drop(columns=['level_0'])
-
-
+import psycopg2 as pg
 from sklearn.naive_bayes import GaussianNB, BernoulliNB
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+    
+TABLE_NAME = 'SensorsDataStream'
 
-# set nan values to 0. The missing values might not affect the model
-full_df = full_df.fillna(0)
+try:
+    conn = pg.connect("dbname='postgres' user='postgres' host='localhost' password='example'")
+    print("Connected to the database")
+except Exception as e:
+    print(e)
+    exit(1)
+    
+def filter_df(df:pd.DataFrame):
+    # Data cleaning
+    # Drop duplicates and NaNs (when all rows/columns are NaN)
+    df = df.drop_duplicates()
+    df = df.dropna(axis=1, how='all')
+    df = df.dropna(axis=0, how='all')
+    df = df.reset_index()
 
-# create a list of features
-features = full_df.columns.tolist()
-features.remove('status')
-features.remove('status_bool')
+    df = df.reset_index()
+    df = df.set_index('timestamp') if 'timestamp' in df.columns and df.index.name != "timestamp" else df
+    df = df.sort_index()
+    
+    # drop the columns that are not useful
+    try:
+        df = df.drop(columns=['index'])
+        df = df.drop(columns=['level_0'])   
+    except:
+        pass
+       
+    return df
+    
+cursor = conn.cursor()
+full_df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME}", conn)
+full_df = filter_df(full_df)
+last_key = full_df.index[-1]
 
-# create a list of target
-target = 'status'
+while True:
+    query = f"SELECT * FROM {TABLE_NAME} WHERE {TABLE_NAME}.timestamp > '{last_key}'"
+    tmp_df = pd.read_sql_query(query, conn)
+    if tmp_df.empty:
+        print("No new data")
+        time.sleep(1)
+        continue
+    tmp_df = filter_df(tmp_df)
+    full_df = filter_df(full_df)
+    full_df = pd.concat([full_df, tmp_df], ignore_index=False, sort=True)
+    full_df = filter_df(full_df)
+    
+    last_key = full_df.index[-1]
+    print(f"Last timestamp: {last_key}")
+    print(full_df)
+    time.sleep(1)
 
-# split the data into train and test
-X_train, X_test, y_train, y_test = train_test_split(full_df[features], full_df[target], test_size=0.2, random_state=42)
+    # set nan values to 0. The missing values might not affect the model
+    full_df = full_df.fillna(0)
 
-# create a Gaussian and Bernoulli Naive Bayes classifier
-gnb = GaussianNB()
-bnb = BernoulliNB()
+    # create a list of features
+    features = full_df.columns.tolist()
+    features.remove('status')
 
-# train the model using the training sets
-gnb.fit(X_train, y_train)
-bnb.fit(X_train, y_train)
+    # create a list of target
+    target = 'status'
 
-# predict the response for test dataset
-y_pred_gnb = gnb.predict(X_test)
-y_pred_bnb = bnb.predict(X_test)
+    # split the data into train and test
+    X_train, X_test, y_train, y_test = train_test_split(full_df[features], full_df[target], test_size=0.2, random_state=42)
 
-# print the first 10 anormal predictions
-def print_result_sample(y_pred, y_test):
-    first_10_anormal_predictions = []
-    first_10_anormal_actual = []
-    for i in range(len(y_pred)):
-        if y_pred[i] == 'ANORMAL':
-            first_10_anormal_predictions.append(y_pred[i])
-            first_10_anormal_actual.append(y_test[i])
-            if len(first_10_anormal_predictions) == 10:
-                break
+    # create a Gaussian and Bernoulli Naive Bayes classifier
+    gnb = GaussianNB()
+    bnb = BernoulliNB()
 
-    print(first_10_anormal_predictions)
-    print(first_10_anormal_actual)
+    # train the model using the training sets
+    gnb.fit(X_train, y_train)
+    bnb.fit(X_train, y_train)
 
-print(f"\nGNB accuracy: {accuracy_score(y_test, y_pred_gnb)}")
-print_result_sample(y_pred_gnb, y_test)
-print(f"\nBNB accuracy: {accuracy_score(y_test, y_pred_bnb)}")
-print_result_sample(y_pred_bnb, y_test)
+    # predict the response for test dataset
+    y_pred_gnb = gnb.predict(X_test)
+    y_pred_bnb = bnb.predict(X_test)
 
-# check how many predictions match between the two models
-print(f"\nNumber of matching predictions: {np.sum(y_pred_gnb == y_pred_bnb)} / {len(y_pred_gnb)}")
+    print(f"\nGNB accuracy: {accuracy_score(y_test, y_pred_gnb)}")
+    print(f"\nBNB accuracy: {accuracy_score(y_test, y_pred_bnb)}")
+
+    # check how many predictions match between the two models
+    print(f"\nNumber of matching predictions: {np.sum(y_pred_gnb == y_pred_bnb)} / {len(y_pred_gnb)}")
+    
+    # next prediction status 
+    print(f"\nNext prediction status GNB: {gnb.predict(full_df[features].iloc[[-1]])}")
+    print(f"\nNext prediction status BNB: {bnb.predict(full_df[features].iloc[[-1]])}")
+    print(f"Number of ANORMAL status find until now: {len(full_df[full_df['status'] == 'ANORMAL'])}")
+    
+    print("========================================")
