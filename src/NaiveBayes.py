@@ -2,12 +2,6 @@ import numpy as np
 
 class NaiveBayes:
     def fit(self, X, y):
-        """Training the model
-
-        Args:
-            X: training samples
-            y: training labels
-        """
         n_samples, n_features = X.shape
         self._classes = np.unique(y)
         n_classes = len(self._classes)
@@ -24,11 +18,6 @@ class NaiveBayes:
             self._priors[idx] = X_c.shape[0] / float(n_samples)     
     
     def predict(self, X):
-        """_summary_
-
-        Args:
-            X: samples
-        """
         y_pred = [self._predict(x) for x in X]
         return np.array(y_pred)
     
