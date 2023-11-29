@@ -29,7 +29,7 @@ except Exception as e:
 print("Consumer started")
 print(consumer.subscription())
 check = True
-
+cursor.execute(f"ROLLBACK;")
 for msg in consumer:
     dictionary = json.loads(msg.value.decode('utf-8'))
     df = pd.DataFrame(dictionary, index=[0])
@@ -39,9 +39,7 @@ for msg in consumer:
     
     # create table if not exists
     if check:
-        cursor.execute("SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name=%s)", (TABLE_NAME,))
-        exists = cursor.fetchone()[0]
-        if exists is None:
+        try:
             cursor.execute(f"CREATE TABLE {TABLE_NAME} (id SERIAL PRIMARY KEY);")
             for column in df.columns:
                 if column == "timestamp":
@@ -51,7 +49,10 @@ for msg in consumer:
                 else:
                     cursor.execute(f"ALTER TABLE {TABLE_NAME} ADD COLUMN {column} FLOAT;")
             conn.commit()
-        check = False
+            check = False
+        except pg.errors.DuplicateTable:
+            print("Table already exists")
+            check = False        
         
     # insert data
     values = df.values.tolist()[0]
@@ -68,12 +69,6 @@ for msg in consumer:
         values_str+=str(value)+","
     values_str = values_str[:-1]
     values_str = values_str.replace("nan", "NULL")
-    
-    # check if exists
-    cursor.execute(f"SELECT EXISTS(SELECT * FROM {TABLE_NAME} WHERE timestamp='{values[0]}')")
-    if cursor.fetchone()[0] is not None:
-        print("Data already exists")
-        continue
     
     cursor.execute(f"INSERT INTO {TABLE_NAME}({columns}) VALUES ({values_str})", values)
     conn.commit()

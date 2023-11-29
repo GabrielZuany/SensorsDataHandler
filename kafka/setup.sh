@@ -3,19 +3,19 @@ NC='\033[0m' # No Color
 BLUE='\033[0;34m'
 
 echo -e "${GREEN}|=======================|Downloading Kafka|=======================|${NC}"
-wget https://archive.apache.org/dist/kafka/2.8.0/kafka_2.12-2.8.0.tgz
+# wget https://archive.apache.org/dist/kafka/2.8.0/kafka_2.12-2.8.0.tgz
 
 echo -e "${GREEN}|=======================|Extracting Kafka|=======================|${NC}"
-tar -xzf kafka_2.12-2.8.0.tgz
-mv kafka_2.12-2.8.0 kafka
-rm kafka_2.12-2.8.0.tgz
+# tar -xzf kafka_2.12-2.8.0.tgz
+# mv kafka_2.12-2.8.0 kafka
+# rm kafka_2.12-2.8.0.tgz
 
 echo -e "${GREEN}|=======================|Starting Zookeeper|=======================|${NC}"
-gnome-terminal -- kafka_2.12-2.8.0/bin/zookeeper-server-start.sh kafka_2.12-2.8.0/config/zookeeper.properties
+gnome-terminal -- ./kafka/kafka_2.12-2.8.0/bin/zookeeper-server-start.sh ./kafka/kafka_2.12-2.8.0/config/zookeeper.properties
 sleep 10
 
 echo -e "${GREEN}|=======================|Starting Server|=======================|${NC}"
-gnome-terminal -- kafka_2.12-2.8.0/bin/kafka-server-start.sh kafka_2.12-2.8.0/config/server.properties
+gnome-terminal -- ./kafka/kafka_2.12-2.8.0/bin/kafka-server-start.sh ./kafka/kafka_2.12-2.8.0/config/server.properties
 sleep 10
 
 echo -e "${GREEN}|=======================|Creating Topic|=======================|${NC}"
