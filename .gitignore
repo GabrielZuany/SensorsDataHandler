@@ -1,4 +1,5 @@
 venv
+.venv
 data.zip
 data
 assets
