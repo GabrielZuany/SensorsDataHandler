@@ -16,7 +16,6 @@ except Exception as e:
     print(str(e))
     exit(1)
     
-    
 try:
     consumer = KafkaConsumer(TOPIC,
                             group_id=None,
@@ -70,8 +69,15 @@ for msg in consumer:
     values_str = values_str[:-1]
     values_str = values_str.replace("nan", "NULL")
     
+    # check if exists
+    cursor.execute(f"SELECT EXISTS(SELECT * FROM {TABLE_NAME} WHERE timestamp='{values[0]}')")
+    if cursor.fetchone()[0] is not None:
+        print("Data already exists")
+        continue
+    
     cursor.execute(f"INSERT INTO {TABLE_NAME}({columns}) VALUES ({values_str})", values)
     conn.commit()
     sleep(1)
     
-    
+cursor.close()
+conn.close()
