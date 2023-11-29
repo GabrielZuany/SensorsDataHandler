@@ -9,8 +9,10 @@ except Exception as e:
     print(str(e))
     exit(1)
 
-# delete topics
-admin_client.delete_topics([TOPIC])
+
+if TOPIC in admin_client.list_topics():
+    print("Topic already exists")
+    exit(0)
 
 try:
     topic_list = []
