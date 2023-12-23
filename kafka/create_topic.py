@@ -5,7 +5,7 @@ from kafka.admin import KafkaAdminClient,NewTopic
 TOPIC="SensorsDataStream"
 
 try:
-    admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id='IndustriALL')
+    admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id='GabrielZuany')
 except Exception as e:
     print("Exception while connecting Kafka")
     print(str(e))
