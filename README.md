@@ -108,3 +108,6 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+---
+
+- _More details in Docs/documentation_en_US.pdf or Docs/documentacao_pt_br.pdf_
